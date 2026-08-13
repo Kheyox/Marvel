@@ -168,7 +168,7 @@ export default function App() {
   const activeUniverseInfo = UNIVERSE_LABELS[selectedUniverse];
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#E62429] selection:text-white pb-20">
+    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#E62429] selection:text-white pb-20 w-full max-w-full overflow-x-hidden">
       
       {/* Top Header Navigation */}
       <Header
@@ -183,7 +183,7 @@ export default function App() {
       />
 
       {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <main className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 overflow-x-hidden">
         
         {/* Bento Grid Summary Dashboard */}
         <BentoDashboard

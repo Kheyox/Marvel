@@ -1,9 +1,83 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" rx="100" fill="#050505"/>
-  <rect x="24" y="24" width="464" height="464" rx="80" fill="#111111" stroke="#E62429" stroke-width="8"/>
-  <rect x="64" y="160" width="384" height="192" rx="16" fill="#E62429"/>
-  <text x="256" y="295" font-family="Impact, Arial Black, sans-serif" font-size="110" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle" letter-spacing="4">MARVEL</text>
-  <text x="256" y="400" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="28" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="8">CHRONO TRACKER</text>
-  <circle cx="256" cy="105" r="28" fill="#E62429"/>
-  <path d="M246 92 L266 105 L246 118 Z" fill="#FFFFFF"/>
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a0203" />
+      <stop offset="35%" stop-color="#0a0a0a" />
+      <stop offset="100%" stop-color="#000000" />
+    </linearGradient>
+
+    <!-- Marvel Red Gradient -->
+    <linearGradient id="marvelRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF383D" />
+      <stop offset="50%" stop-color="#E62429" />
+      <stop offset="100%" stop-color="#A50E12" />
+    </linearGradient>
+
+    <!-- Metallic Gold Glow for Timeline / Infinity Stone Chrono -->
+    <linearGradient id="goldGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFDF00" />
+      <stop offset="50%" stop-color="#F5A623" />
+      <stop offset="100%" stop-color="#D0021B" />
+    </linearGradient>
+
+    <!-- Shield Ring Metallic -->
+    <linearGradient id="shieldRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E62429" />
+      <stop offset="50%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#0047AB" />
+    </linearGradient>
+
+    <!-- Soft Glow Filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="redShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#E62429" flood-opacity="0.6" />
+    </filter>
+  </defs>
+
+  <!-- Base App Icon Rounded Square -->
+  <rect width="512" height="512" rx="115" fill="url(#bgGrad)"/>
+  <rect x="8" y="8" width="496" height="496" rx="108" fill="none" stroke="url(#marvelRed)" stroke-width="6" stroke-opacity="0.8"/>
+
+  <!-- Subtle Radial Ambient Light -->
+  <circle cx="256" cy="256" r="210" fill="#E62429" opacity="0.15" />
+
+  <!-- Outer Captain America / Chrono Dial Rings -->
+  <circle cx="256" cy="256" r="185" fill="none" stroke="#E62429" stroke-width="12" stroke-opacity="0.9" />
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-opacity="0.7" stroke-dasharray="14 10" />
+  <circle cx="256" cy="256" r="138" fill="none" stroke="#0055A5" stroke-width="10" stroke-opacity="0.8" />
+  
+  <!-- Central Dark Core with Red Tint -->
+  <circle cx="256" cy="256" r="125" fill="#0D0D0D" stroke="#E62429" stroke-width="3" />
+
+  <!-- Chronology Timeline Clockwork Accents (Hour ticks) -->
+  <line x1="256" y1="78" x2="256" y2="100" stroke="#FFDF00" stroke-width="5" stroke-linecap="round" filter="url(#glow)"/>
+  <line x1="256" y1="412" x2="256" y2="434" stroke="#FFDF00" stroke-width="5" stroke-linecap="round" filter="url(#glow)"/>
+  <line x1="78" y1="256" x2="100" y2="256" stroke="#FFDF00" stroke-width="5" stroke-linecap="round" filter="url(#glow)"/>
+  <line x1="412" y1="256" x2="434" y2="256" stroke="#FFDF00" stroke-width="5" stroke-linecap="round" filter="url(#glow)"/>
+
+  <!-- Avengers 'A' Emblem Styled with Timeline Arrow -->
+  <!-- Diagonal Left Leg -->
+  <path d="M 215 150 L 165 350 L 205 350 L 225 270 L 287 270 L 297 310 L 250 310 L 240 350 L 340 350 L 300 190 Z" fill="url(#marvelRed)" filter="url(#redShadow)"/>
+  
+  <!-- Arrow Head (Avengers Dynamic Slash) -->
+  <polygon points="275,225 365,225 345,260 285,260" fill="#FFFFFF" />
+  <polygon points="340,205 395,242 340,280 355,242" fill="#FFDF00" filter="url(#glow)" />
+
+  <!-- Inner 'A' cutout -->
+  <polygon points="248,195 235,245 275,245" fill="#0D0D0D" />
+
+  <!-- MARVEL Iconic Red Rectangular Badge -->
+  <g transform="translate(106, 368)">
+    <rect x="0" y="0" width="300" height="74" rx="10" fill="url(#marvelRed)" filter="url(#redShadow)" stroke="#FFFFFF" stroke-width="2"/>
+    <text x="150" y="54" font-family="'Impact', 'Arial Black', 'Trebuchet MS', sans-serif" font-size="52" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle" letter-spacing="3">MARVEL</text>
+  </g>
+
+  <!-- Glowing Infinity Time Gem at Center Top -->
+  <circle cx="256" cy="120" r="10" fill="#00FF88" filter="url(#glow)" />
+  <circle cx="256" cy="120" r="4" fill="#FFFFFF" />
 </svg>

@@ -323,6 +323,18 @@ export const ApkGuideModal: React.FC<ApkGuideModalProps> = ({ isOpen, onClose })
                 </div>
               )}
 
+              {/* Google Play Protect explanation banner */}
+              <div className="bg-blue-950/30 border border-blue-500/40 rounded-xl p-3.5 text-xs space-y-1.5 text-blue-200">
+                <div className="flex items-center gap-2 text-blue-400 font-bold text-[11px] uppercase tracking-wider">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Avis Google Play Protect lors de l'installation</span>
+                </div>
+                <p className="text-white/80 leading-relaxed text-[11px]">
+                  Android affiche par défaut l'alerte <em>« Play Protect n'a jamais vu d'appli de ce développeur »</em> pour <strong>tous les APKs installés en direct</strong> (hors Google Play Store payant). 
+                  L'application est 100% saine et open-source. Cliquez simplement sur <strong>« Installer quand même »</strong>.
+                </p>
+              </div>
+
               {/* How it works info */}
               <div className="bg-[#050505] border border-white/10 rounded-xl p-4 text-xs space-y-2 text-white/60">
                 <h5 className="font-bold text-white uppercase text-[11px] flex items-center gap-1.5">

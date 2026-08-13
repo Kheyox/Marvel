@@ -1,8 +1,43 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
-  <rect width="192" height="192" rx="40" fill="#050505"/>
-  <rect x="8" y="8" width="176" height="176" rx="32" fill="#111111" stroke="#E62429" stroke-width="4"/>
-  <rect x="24" y="60" width="144" height="72" rx="8" fill="#E62429"/>
-  <text x="96" y="112" font-family="Impact, Arial Black, sans-serif" font-size="42" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">MARVEL</text>
-  <circle cx="96" cy="40" r="12" fill="#E62429"/>
-  <path d="M92 34 L101 40 L92 46 Z" fill="#FFFFFF"/>
+  <defs>
+    <linearGradient id="bgGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a0203" />
+      <stop offset="40%" stop-color="#0a0a0a" />
+      <stop offset="100%" stop-color="#000000" />
+    </linearGradient>
+
+    <linearGradient id="marvelRed192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF383D" />
+      <stop offset="50%" stop-color="#E62429" />
+      <stop offset="100%" stop-color="#A50E12" />
+    </linearGradient>
+
+    <filter id="glow192" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <rect width="192" height="192" rx="42" fill="url(#bgGrad192)"/>
+  <rect x="3" y="3" width="186" height="186" rx="40" fill="none" stroke="url(#marvelRed192)" stroke-width="3" stroke-opacity="0.8"/>
+
+  <!-- Rings -->
+  <circle cx="96" cy="96" r="70" fill="none" stroke="#E62429" stroke-width="5" stroke-opacity="0.9" />
+  <circle cx="96" cy="96" r="60" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-opacity="0.7" stroke-dasharray="6 4" />
+  <circle cx="96" cy="96" r="52" fill="#0D0D0D" stroke="#0055A5" stroke-width="4" />
+
+  <!-- Avengers 'A' -->
+  <path d="M 80 56 L 62 132 L 78 132 L 85 102 L 108 102 L 112 118 L 94 118 L 90 132 L 128 132 L 113 72 Z" fill="url(#marvelRed192)"/>
+  <polygon points="104,85 138,85 130,98 108,98" fill="#FFFFFF" />
+  <polygon points="128,78 150,92 128,106 134,92" fill="#FFDF00" filter="url(#glow192)" />
+  <polygon points="93,73 88,92 104,92" fill="#0D0D0D" />
+
+  <!-- MARVEL Badge -->
+  <g transform="translate(40, 138)">
+    <rect x="0" y="0" width="112" height="28" rx="4" fill="url(#marvelRed192)" stroke="#FFFFFF" stroke-width="1"/>
+    <text x="56" y="21" font-family="'Impact', 'Arial Black', sans-serif" font-size="20" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">MARVEL</text>
+  </g>
+
+  <!-- Infinity Time Stone -->
+  <circle cx="96" cy="45" r="4" fill="#00FF88" filter="url(#glow192)" />
 </svg>

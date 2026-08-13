@@ -128,12 +128,12 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
         </div>
 
         {/* BENTO CARD 2: SUIVI DE L'UNIVERS (Marvel Red Hero Banner with Progress Bar) - 8 Cols */}
-        <div className="md:col-span-8 bg-[#E62429] rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between relative overflow-hidden min-h-[260px] shadow-2xl">
-          <div className="relative z-10 max-w-md space-y-2 mb-4 sm:mb-0">
+        <div className="md:col-span-8 bg-[#E62429] rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between relative overflow-hidden min-h-[240px] sm:min-h-[260px] shadow-2xl w-full max-w-full">
+          <div className="relative z-10 w-full sm:max-w-md space-y-2 mb-4 sm:mb-0">
             <span className="text-white/80 text-[10px] font-black uppercase tracking-[0.25em]">
               {activeUniverseLabel ? `AVANCÉE • ${activeUniverseLabel.toUpperCase()}` : 'MASTERY CHECKPOINT'}
             </span>
-            <h3 className="text-3xl sm:text-4xl font-black uppercase italic leading-none text-white tracking-tight">
+            <h3 className="text-2xl sm:text-4xl font-black uppercase italic leading-none text-white tracking-tight break-words">
               Suivi de l'univers Marvel
             </h3>
             <p className="text-white/95 text-xs font-medium leading-relaxed">
@@ -157,7 +157,7 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
             </div>
 
             {/* Quick Streaming Platform Shortcuts */}
-            <div className="pt-2 flex items-center gap-2">
+            <div className="pt-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
               <span className="text-[10px] font-black uppercase text-white/80">Filtrer par :</span>
               <button
                 onClick={() => onSelectPlatform && onSelectPlatform('Disney+')}
@@ -187,20 +187,20 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
 
           </div>
 
-          <div className="relative z-10 bg-black/30 backdrop-blur-md p-5 rounded-2xl border border-white/20 text-center min-w-[170px] shadow-2xl">
-            <p className="text-4xl sm:text-5xl font-black italic text-white tracking-tighter">
-              {stats.watchedItemsCount} <span className="text-xl text-white/60 font-mono">/ {stats.totalItemsCount}</span>
+          <div className="relative z-10 bg-black/30 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/20 text-center w-full sm:w-auto sm:min-w-[170px] shadow-2xl">
+            <p className="text-3xl sm:text-5xl font-black italic text-white tracking-tighter">
+              {stats.watchedItemsCount} <span className="text-lg sm:text-xl text-white/60 font-mono">/ {stats.totalItemsCount}</span>
             </p>
             <p className="text-[10px] uppercase font-bold text-white/90 tracking-widest mt-1">
               Contenus Vus
             </p>
-            <div className="mt-3 pt-2 border-t border-white/10 text-xs font-mono font-bold text-white">
+            <div className="mt-2 sm:mt-3 pt-2 border-t border-white/10 text-xs font-mono font-bold text-white">
               {stats.percentageTime}% du temps total
             </div>
           </div>
 
           {/* Decorative Background Text */}
-          <div className="absolute right-[-20px] bottom-[-20px] rotate-[-5deg] text-[120px] font-black text-black/10 select-none pointer-events-none leading-none">
+          <div className="absolute right-[-20px] bottom-[-20px] rotate-[-5deg] text-[100px] sm:text-[120px] font-black text-black/10 select-none pointer-events-none leading-none">
             MARVEL
           </div>
         </div>
