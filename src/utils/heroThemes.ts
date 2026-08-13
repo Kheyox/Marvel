@@ -65,25 +65,47 @@ export function getHeroTheme(title: string, characters: string[] = [], universe:
     };
   }
 
-  if (t.includes('deadpool') || t.includes('wolverine') || t.includes('logan') || t.includes('creed')) {
+  if (t.includes('deadpool & wolverine') || (t.includes('deadpool') && t.includes('wolverine'))) {
     return {
       heroName: 'Deadpool & Wolverine',
-      heroIcon: '🗡️',
+      heroIcon: '⚔️',
       gradientBg: 'from-red-950 via-zinc-950 to-amber-950/80',
+      accentText: 'text-amber-400',
+      borderColor: 'border-amber-500/50',
+      badgeBg: 'bg-gradient-to-r from-red-600 to-amber-500 text-black',
+    };
+  }
+
+  if (t.includes('deadpool')) {
+    return {
+      heroName: 'Deadpool',
+      heroIcon: '💀',
+      gradientBg: 'from-red-950 via-zinc-950 to-black',
       accentText: 'text-red-400',
       borderColor: 'border-red-500/50',
-      badgeBg: 'bg-gradient-to-r from-red-600 to-amber-500 text-black',
+      badgeBg: 'bg-red-600 text-white',
+    };
+  }
+
+  if (t.includes('wolverine') || t.includes('logan') || t.includes('arme x') || t.includes('weapon x')) {
+    return {
+      heroName: 'Wolverine / Logan',
+      heroIcon: '🐺',
+      gradientBg: 'from-amber-950 via-zinc-950 to-stone-900',
+      accentText: 'text-amber-400',
+      borderColor: 'border-amber-500/50',
+      badgeBg: 'bg-amber-500 text-black',
     };
   }
 
   if (t.includes('x-men') || t.includes('mutant') || t.includes('xavier') || t.includes('magneto') || t.includes('phoenix') || t.includes('cyclope')) {
     return {
-      heroName: 'X-Men Mutants',
+      heroName: 'X-Men',
       heroIcon: '❌',
-      gradientBg: 'from-amber-950 via-zinc-900 to-blue-950/80',
-      accentText: 'text-amber-400',
-      borderColor: 'border-amber-500/50',
-      badgeBg: 'bg-gradient-to-r from-amber-500 to-blue-600 text-black',
+      gradientBg: 'from-blue-950 via-zinc-900 to-amber-950/80',
+      accentText: 'text-blue-400',
+      borderColor: 'border-blue-500/50',
+      badgeBg: 'bg-gradient-to-r from-blue-600 to-amber-500 text-white',
     };
   }
 

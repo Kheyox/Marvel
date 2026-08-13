@@ -1,5 +1,6 @@
 import { MarvelItem, StreamingPlatform } from '../types';
 import { MCU_ENRICHMENT_MAP } from './mcuMetadataMap';
+import { getMarvelPoster } from '../utils/marvelPosters';
 
 export const STREAMING_PLATFORMS: Record<string, StreamingPlatform> = {
   'Disney+': { name: 'Disney+', badgeBg: 'bg-blue-600', textColor: 'text-white', logoLetter: 'D+' },
@@ -1587,9 +1588,13 @@ const RAW_MARVEL_ITEMS: MarvelItem[] = [
 
 export const MARVEL_ITEMS: MarvelItem[] = RAW_MARVEL_ITEMS.map((item) => {
   const enrichment = MCU_ENRICHMENT_MAP[item.id];
+  const dedicatedPoster = getMarvelPoster(item.id, item.title, item.universe);
+  const posterUrl = dedicatedPoster || item.posterUrl;
+
   if (!enrichment) {
     return {
       ...item,
+      posterUrl,
       inUniverseYear: `${item.releaseYear}`,
       postCreditsCount: 0,
       postCreditsDescription: 'Aucune information',
@@ -1603,6 +1608,7 @@ export const MARVEL_ITEMS: MarvelItem[] = RAW_MARVEL_ITEMS.map((item) => {
 
   return {
     ...item,
+    posterUrl,
     inUniverseYear: enrichment.inUniverseYear,
     postCreditsCount: enrichment.postCreditsCount,
     postCreditsDescription: enrichment.postCreditsDescription,
