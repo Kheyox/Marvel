@@ -59,50 +59,50 @@ export const WatchOrderSelector: React.FC<WatchOrderSelectorProps> = ({
         })}
       </div>
 
-      {/* Content Type Filter: Tout (Films + Séries) vs Films vs Séries */}
-      <div className="bg-[#080808] border border-white/10 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+      {/* Content Type Filter: Tout vs Films vs Séries */}
+      <div className="bg-[#080808] border border-white/10 rounded-xl p-2.5 sm:p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div className="flex items-center gap-2">
           <Layers className="w-3.5 h-3.5 text-[#E62429]" />
-          <span className="text-[11px] font-black uppercase text-white/80 tracking-wider">
+          <span className="text-[11px] font-black uppercase text-white/70 tracking-wider">
             Format :
           </span>
         </div>
 
-        <div className="grid grid-cols-3 gap-1.5 bg-[#161616] p-1 rounded-xl border border-white/10 w-full sm:w-auto">
+        <div className="grid grid-cols-3 gap-1 bg-[#141414] p-1 rounded-xl border border-white/10 w-full sm:w-auto">
           <button
             onClick={() => onTypeChange('all')}
-            className={`px-3 py-2 sm:py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
+            className={`py-1.5 px-2.5 sm:px-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               selectedType === 'all'
-                ? 'bg-red-600 text-white shadow-md shadow-red-950/60'
+                ? 'bg-[#E62429] text-white shadow-md shadow-red-950/60'
                 : 'text-white/60 hover:text-white hover:bg-white/5'
             }`}
           >
             <Layers className="w-3.5 h-3.5 shrink-0" />
-            <span>Tout (Films & Séries)</span>
+            <span>Tout</span>
           </button>
 
           <button
             onClick={() => onTypeChange('film')}
-            className={`px-3 py-2 sm:py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
+            className={`py-1.5 px-2.5 sm:px-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               selectedType === 'film'
-                ? 'bg-red-600 text-white shadow-md shadow-red-950/60'
+                ? 'bg-[#E62429] text-white shadow-md shadow-red-950/60'
                 : 'text-white/60 hover:text-white hover:bg-white/5'
             }`}
           >
             <Film className="w-3.5 h-3.5 shrink-0" />
-            <span>Films seuls</span>
+            <span>Films</span>
           </button>
 
           <button
             onClick={() => onTypeChange('serie')}
-            className={`px-3 py-2 sm:py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap ${
+            className={`py-1.5 px-2.5 sm:px-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               selectedType === 'serie'
-                ? 'bg-red-600 text-white shadow-md shadow-red-950/60'
+                ? 'bg-[#E62429] text-white shadow-md shadow-red-950/60'
                 : 'text-white/60 hover:text-white hover:bg-white/5'
             }`}
           >
             <Tv className="w-3.5 h-3.5 shrink-0" />
-            <span>Séries seules</span>
+            <span>Séries</span>
           </button>
         </div>
       </div>
