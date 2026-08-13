@@ -1,6 +1,6 @@
 import React from 'react';
-import { Search, ArrowUpDown, LayoutGrid, GitCommit, Film, Tv, CheckCircle2, PlayCircle, EyeOff, X, Filter } from 'lucide-react';
-import { SortOption } from '../types';
+import { Search, ArrowUpDown, LayoutGrid, GitCommit, Film, Tv, CheckCircle2, PlayCircle, EyeOff, X, Filter, ListChecks } from 'lucide-react';
+import { SortOption, ViewMode } from '../types';
 import { UNIVERSE_LABELS, STREAMING_PLATFORMS } from '../data/marvelData';
 
 interface FilterBarProps {
@@ -16,13 +16,14 @@ interface FilterBarProps {
   onTypeChange: (type: string) => void;
   selectedStatus: string;
   onStatusChange: (status: string) => void;
-  viewMode: 'grid' | 'timeline';
-  onViewModeChange: (mode: 'grid' | 'timeline') => void;
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
   onSelectAllWatched?: () => void;
   onUnselectAllWatched?: () => void;
   filteredCount: number;
   totalCount: number;
 }
+
 
 export const FilterBar: React.FC<FilterBarProps> = ({
   searchQuery,
@@ -96,7 +97,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             )}
           </div>
 
-          {/* Grid vs Timeline mode button */}
+          {/* Grid vs Checklist vs Timeline mode button */}
           <div className="bg-[#050505] p-1 rounded-xl border border-white/10 flex items-center gap-1">
             <button
               onClick={() => onViewModeChange('grid')}
@@ -105,9 +106,22 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   ? 'bg-[#E62429] text-white shadow-lg shadow-red-950/50'
                   : 'text-white/40 hover:text-white hover:bg-white/5'
               }`}
+              title="Vue Grille d'affiches"
             >
               <LayoutGrid className="w-3.5 h-3.5" />
               <span>Grille</span>
+            </button>
+            <button
+              onClick={() => onViewModeChange('checklist')}
+              className={`flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-black uppercase italic transition-all cursor-pointer ${
+                viewMode === 'checklist'
+                  ? 'bg-[#E62429] text-white shadow-lg shadow-red-950/50'
+                  : 'text-white/40 hover:text-white hover:bg-white/5'
+              }`}
+              title="Vue Liste Checklist compacte (comme MarvelWatchlist)"
+            >
+              <ListChecks className="w-3.5 h-3.5" />
+              <span>Checklist</span>
             </button>
             <button
               onClick={() => onViewModeChange('timeline')}
@@ -116,11 +130,13 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                   ? 'bg-[#E62429] text-white shadow-lg shadow-red-950/50'
                   : 'text-white/40 hover:text-white hover:bg-white/5'
               }`}
+              title="Vue Frise chronologique"
             >
               <GitCommit className="w-3.5 h-3.5" />
               <span>Frise</span>
             </button>
           </div>
+
 
         </div>
 

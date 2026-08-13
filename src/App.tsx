@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { MARVEL_ITEMS, UNIVERSE_LABELS } from './data/marvelData';
-import { MarvelItem, UserProgress, WatchStatus, SortOption } from './types';
+import { MarvelItem, UserProgress, WatchStatus, SortOption, ViewMode, WatchOrderPreset } from './types';
 import { Header } from './components/Header';
 import { BentoDashboard } from './components/BentoDashboard';
 import { FilterBar } from './components/FilterBar';
 import { MarvelCard } from './components/MarvelCard';
 import { MarvelTimelineView } from './components/MarvelTimelineView';
+import { MarvelChecklistView } from './components/MarvelChecklistView';
+import { WatchOrderSelector } from './components/WatchOrderSelector';
+import { NextUpCard } from './components/NextUpCard';
+import { PhaseProgressTracker } from './components/PhaseProgressTracker';
 import { ItemDetailModal } from './components/ItemDetailModal';
 import { ExportImportModal } from './components/ExportImportModal';
 import { ApkGuideModal } from './components/ApkGuideModal';
@@ -29,13 +33,16 @@ export default function App() {
     return {};
   });
 
+  const [activePreset, setActivePreset] = useState<WatchOrderPreset>('chronological');
+  const [activePhaseFilter, setActivePhaseFilter] = useState<string | null>(null);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSort, setSelectedSort] = useState<SortOption>('chronological');
   const [selectedUniverse, setSelectedUniverse] = useState<string>('all');
   const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   const [selectedItemForModal, setSelectedItemForModal] = useState<MarvelItem | null>(null);
   const [isExportImportOpen, setIsExportImportOpen] = useState(false);
@@ -67,6 +74,47 @@ export default function App() {
     }
   }, [progress]);
 
+  // Handle Preset Selection
+  const handleSelectPreset = (preset: WatchOrderPreset) => {
+    setActivePreset(preset);
+    setActivePhaseFilter(null);
+
+    switch (preset) {
+      case 'chronological':
+        setSelectedSort('chronological');
+        setSelectedUniverse('all');
+        break;
+      case 'release':
+        setSelectedSort('release');
+        setSelectedUniverse('mcu');
+        break;
+      case 'essential':
+        setSelectedSort('chronological');
+        setSelectedUniverse('mcu');
+        break;
+      case 'infinity_saga':
+        setSelectedSort('release');
+        setSelectedUniverse('mcu');
+        break;
+      case 'multiverse_saga':
+        setSelectedSort('release');
+        setSelectedUniverse('mcu');
+        break;
+      case 'spiderman':
+        setSelectedSort('release');
+        setSelectedUniverse('all');
+        break;
+      case 'xmen':
+        setSelectedSort('release');
+        setSelectedUniverse('xmen');
+        break;
+      case 'defenders':
+        setSelectedSort('chronological');
+        setSelectedUniverse('all');
+        break;
+    }
+  };
+
   // --- HANDLERS ---
   const handleStatusChange = (itemId: string, newStatus: WatchStatus) => {
     setProgress((prev) => ({
@@ -88,6 +136,40 @@ export default function App() {
   // --- FILTERING & SORTING LOGIC ---
   const filteredAndSortedItems = useMemo(() => {
     return MARVEL_ITEMS.filter((item) => {
+      // Preset Specific Filters
+      if (activePreset === 'essential' && !item.isEssential) {
+        return false;
+      }
+      if (activePreset === 'infinity_saga' && item.saga !== "Saga de l'Infini") {
+        return false;
+      }
+      if (activePreset === 'multiverse_saga' && item.saga !== "Saga du Multivers") {
+        return false;
+      }
+      if (activePreset === 'spiderman') {
+        const isSpiderItem = item.title.toLowerCase().includes('spider') || 
+                             item.title.toLowerCase().includes('venom') || 
+                             item.universe === 'spiderman_raimi_webb' || 
+                             item.universe === 'sony_spiderverse' ||
+                             item.keyCharacters?.some(c => c.toLowerCase().includes('spider') || c.toLowerCase().includes('peter'));
+        if (!isSpiderItem) return false;
+      }
+      if (activePreset === 'defenders') {
+        const isDefenders = item.phaseOrEra.includes('Defenders') || 
+                            item.title.includes('Daredevil') || 
+                            item.title.includes('Jessica Jones') || 
+                            item.title.includes('Luke Cage') || 
+                            item.title.includes('Iron Fist') || 
+                            item.title.includes('Punisher');
+        if (!isDefenders) return false;
+      }
+
+      // Phase Progress Click Filter
+      if (activePhaseFilter) {
+        const matchesPhase = item.phase === activePhaseFilter || item.phaseOrEra.includes(activePhaseFilter);
+        if (!matchesPhase) return false;
+      }
+
       // Search filter
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
@@ -145,7 +227,22 @@ export default function App() {
           return a.chronologicalOrder - b.chronologicalOrder;
       }
     });
-  }, [searchQuery, selectedUniverse, selectedPlatform, selectedType, selectedStatus, selectedSort, progress]);
+  }, [activePreset, activePhaseFilter, searchQuery, selectedUniverse, selectedPlatform, selectedType, selectedStatus, selectedSort, progress]);
+
+  // Calculate Next Up Item (first unwatched in filtered or global MCU list)
+  const nextUpItem = useMemo(() => {
+    const candidate = filteredAndSortedItems.find((item) => {
+      const s = progress[item.id]?.status || 'unwatched';
+      return s !== 'watched';
+    });
+    if (candidate) return candidate;
+
+    // If active filter has none, search in MARVEL_ITEMS sorted by active sort
+    return MARVEL_ITEMS.find((item) => {
+      const s = progress[item.id]?.status || 'unwatched';
+      return s !== 'watched';
+    }) || null;
+  }, [filteredAndSortedItems, progress]);
 
   // Bulk Watch / Unwatch for currently visible items
   const handleMarkAllVisibleAsWatched = () => {
@@ -183,9 +280,33 @@ export default function App() {
       />
 
       {/* Main Container */}
-      <main className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 overflow-x-hidden">
+      <main className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 overflow-x-hidden space-y-6">
         
-        {/* Bento Grid Summary Dashboard */}
+        {/* 1. Watch Order Presets Selector (MarvelWatchlist inspired) */}
+        <WatchOrderSelector
+          activePreset={activePreset}
+          onSelectPreset={handleSelectPreset}
+          selectedType={selectedType}
+          onTypeChange={setSelectedType}
+        />
+
+        {/* 2. Next Up Highlight Card */}
+        <NextUpCard
+          item={nextUpItem}
+          onStatusChange={handleStatusChange}
+          onOpenDetails={setSelectedItemForModal}
+        />
+
+        {/* 3. Phase Progress Tracker */}
+        <PhaseProgressTracker
+          items={MARVEL_ITEMS}
+          progress={progress}
+          activePhaseFilter={activePhaseFilter}
+          onSelectPhaseFilter={setActivePhaseFilter}
+          selectedType={selectedType}
+        />
+
+        {/* 4. Bento Grid Summary Dashboard */}
         <BentoDashboard
           items={MARVEL_ITEMS}
           progress={progress}
@@ -196,7 +317,7 @@ export default function App() {
           onOpenDetails={setSelectedItemForModal}
         />
 
-        {/* Filter Controls Bar */}
+        {/* 5. Filter Controls Bar */}
         <FilterBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -218,7 +339,7 @@ export default function App() {
           totalCount={MARVEL_ITEMS.length}
         />
 
-        {/* Display Content: Bento Grid vs Vertical Timeline */}
+        {/* 6. Display Content: Bento Grid vs Compact Checklist vs Vertical Timeline */}
         {filteredAndSortedItems.length === 0 ? (
           <div className="bg-[#111] border border-white/10 rounded-2xl p-12 text-center my-8 max-w-lg mx-auto shadow-2xl">
             <Film className="w-12 h-12 text-[#E62429] mx-auto mb-3 animate-pulse" />
@@ -228,6 +349,8 @@ export default function App() {
             </p>
             <button
               onClick={() => {
+                setActivePreset('chronological');
+                setActivePhaseFilter(null);
                 setSearchQuery('');
                 setSelectedUniverse('all');
                 setSelectedPlatform('all');
@@ -251,6 +374,22 @@ export default function App() {
               />
             ))}
           </div>
+        ) : viewMode === 'checklist' ? (
+          <MarvelChecklistView
+            items={filteredAndSortedItems}
+            progress={progress}
+            onStatusChange={handleStatusChange}
+            onRatingChange={(id, rating) => {
+              setProgress((prev) => ({
+                ...prev,
+                [id]: {
+                  ...(prev[id] || { status: 'watched' }),
+                  rating,
+                },
+              }));
+            }}
+            onOpenDetails={setSelectedItemForModal}
+          />
         ) : (
           <MarvelTimelineView
             items={filteredAndSortedItems}
@@ -291,10 +430,10 @@ export default function App() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 font-mono">
           <div className="flex items-center gap-2">
             <span className="font-black text-[#E62429] italic uppercase">MARVEL CHRONO TRACKER</span>
-            <span>• Bento Grid Interface</span>
+            <span>• Inspiré de MarvelWatchlist</span>
           </div>
           <p className="text-white/40">
-            Marvel Studios, Disney, Sony Pictures & Fox Rights reserved.
+            Guide complet du MCU : Ordre Chronologique, Scènes Post-Génériques & Suivi de Visionnage.
           </p>
         </div>
       </footer>
@@ -302,3 +441,4 @@ export default function App() {
     </div>
   );
 }
+

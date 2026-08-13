@@ -1,4 +1,5 @@
 import { MarvelItem, StreamingPlatform } from '../types';
+import { MCU_ENRICHMENT_MAP } from './mcuMetadataMap';
 
 export const STREAMING_PLATFORMS: Record<string, StreamingPlatform> = {
   'Disney+': { name: 'Disney+', badgeBg: 'bg-blue-600', textColor: 'text-white', logoLetter: 'D+' },
@@ -9,7 +10,7 @@ export const STREAMING_PLATFORMS: Record<string, StreamingPlatform> = {
   'Apple TV': { name: 'Apple TV', badgeBg: 'bg-neutral-700', textColor: 'text-white', logoLetter: '' },
 };
 
-export const MARVEL_ITEMS: MarvelItem[] = [
+const RAW_MARVEL_ITEMS: MarvelItem[] = [
   // --- CHRONOLOGICAL MCU & MAIN UNIVERSES ---
   {
     id: 'cap-america-1',
@@ -1583,6 +1584,33 @@ export const MARVEL_ITEMS: MarvelItem[] = [
     imdbRating: 7.5,
   }
 ];
+
+export const MARVEL_ITEMS: MarvelItem[] = RAW_MARVEL_ITEMS.map((item) => {
+  const enrichment = MCU_ENRICHMENT_MAP[item.id];
+  if (!enrichment) {
+    return {
+      ...item,
+      inUniverseYear: `${item.releaseYear}`,
+      postCreditsCount: 0,
+      postCreditsDescription: 'Aucune information',
+      isEssential: item.universe === 'mcu' && item.type === 'film',
+      saga: item.phaseOrEra.includes('Phase 1') || item.phaseOrEra.includes('Phase 2') || item.phaseOrEra.includes('Phase 3') 
+        ? 'Saga de l\'Infini' 
+        : item.universe === 'mcu' ? 'Saga du Multivers' : 'Autre Saga',
+      phase: item.phaseOrEra.match(/Phase \d/)?.[0],
+    };
+  }
+
+  return {
+    ...item,
+    inUniverseYear: enrichment.inUniverseYear,
+    postCreditsCount: enrichment.postCreditsCount,
+    postCreditsDescription: enrichment.postCreditsDescription,
+    isEssential: enrichment.isEssential,
+    phase: enrichment.phase || item.phaseOrEra.match(/Phase \d/)?.[0],
+    saga: enrichment.saga,
+  };
+});
 
 export const UNIVERSE_LABELS: Record<string, { label: string; description: string; color: string }> = {
   all: { label: 'Toutes les Sagas', description: 'MCU, Spider-Man, X-Men, Sony, Marvel Classics', color: 'bg-zinc-800 text-white' },

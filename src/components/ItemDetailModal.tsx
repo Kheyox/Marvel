@@ -110,10 +110,35 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
                 <Film className="w-4 h-4 text-blue-400" />
                 <span>Ordre de sortie : <strong className="text-white">N° {item.releaseOrder}</strong></span>
               </div>
+              {item.inUniverseYear && (
+                <div className="flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-amber-400" />
+                  <span>Chronologie de l'histoire : <strong className="text-amber-300">{item.inUniverseYear}</strong></span>
+                </div>
+              )}
             </div>
           </div>
 
+          {/* Post-Credits Scene Section */}
+          {item.postCreditsCount !== undefined && (
+            <div className="bg-purple-950/30 border border-purple-800/40 p-4 rounded-xl space-y-1.5">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-black text-purple-300 uppercase tracking-widest flex items-center gap-1.5">
+                  <span>🎬</span>
+                  Guide des Scènes Post-Génériques
+                </h3>
+                <span className="text-xs font-black bg-purple-900 text-purple-200 px-2 py-0.5 rounded">
+                  {item.postCreditsCount > 0 ? `${item.postCreditsCount} scène${item.postCreditsCount > 1 ? 's' : ''}` : 'Aucune'}
+                </span>
+              </div>
+              <p className="text-xs text-white/80 leading-relaxed font-sans">
+                {item.postCreditsDescription || (item.postCreditsCount > 0 ? `${item.postCreditsCount} scène(s) à ne pas manquer après le générique !` : 'Pas de scène post-générique.')}
+              </p>
+            </div>
+          )}
+
           {/* Synopsis Section */}
+
           <div className="space-y-2 bg-[#050505] border border-white/10 p-4 rounded-xl">
             <h3 className="text-xs font-black text-white/50 uppercase tracking-widest flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />

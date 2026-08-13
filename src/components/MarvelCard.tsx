@@ -157,15 +157,49 @@ export const MarvelCard: React.FC<MarvelCardProps> = ({
         
         {/* Era & Synopsis */}
         <div onClick={() => onOpenDetails(item)} className="cursor-pointer space-y-1.5">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-black text-[#E62429] uppercase tracking-widest">
-              {item.phaseOrEra}
-            </p>
-            <span className="text-[10px] font-mono text-white/40">
-              {item.releaseYear}
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-1">
+            <div className="flex items-center gap-1.5">
+              <p className="text-[10px] font-black text-[#E62429] uppercase tracking-widest">
+                {item.phaseOrEra}
+              </p>
+              {item.isEssential && (
+                <span className="bg-amber-400/20 text-amber-300 text-[9px] font-bold px-1.5 py-0.2 rounded border border-amber-400/30">
+                  ⚡ Pilier
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 text-[10px] font-mono">
+              {item.inUniverseYear && (
+                <span className="text-amber-300 font-bold bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20" title="Époque dans la chronologie de l'histoire">
+                  ⏳ {item.inUniverseYear}
+                </span>
+              )}
+              <span className="text-white/40">
+                ({item.releaseYear})
+              </span>
+            </div>
           </div>
-          <p className="text-xs text-white/70 line-clamp-2 leading-relaxed">
+
+          {/* Post-Credits Scene Guide Badge */}
+          {item.postCreditsCount !== undefined && (
+            <div 
+              className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg border ${
+                item.postCreditsCount > 0
+                  ? 'bg-purple-950/70 text-purple-300 border-purple-800/50'
+                  : 'bg-white/5 text-white/40 border-white/10'
+              }`}
+              title={item.postCreditsDescription}
+            >
+              <span>🎬</span>
+              <span>
+                {item.postCreditsCount > 0 
+                  ? `${item.postCreditsCount} scène${item.postCreditsCount > 1 ? 's' : ''} post-générique` 
+                  : 'Aucune scène post-générique'}
+              </span>
+            </div>
+          )}
+
+          <p className="text-xs text-white/70 line-clamp-2 leading-relaxed pt-0.5">
             {item.synopsis}
           </p>
         </div>
