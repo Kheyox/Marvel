@@ -12,21 +12,39 @@ export interface GithubReleaseInfo {
 }
 
 const GITHUB_REPO_STORAGE_KEY = 'marvel_tracker_github_repo';
+export const DEFAULT_GITHUB_REPO = 'Kheyox/Marvel';
+
+export function cleanRepoString(input: string): string {
+  if (!input) return DEFAULT_GITHUB_REPO;
+  return input
+    .trim()
+    .replace(/^https?:\/\/github\.com\//i, '')
+    .replace(/^github\.com\//i, '')
+    .replace(/\.git$/i, '')
+    .replace(/\/+$/, '')
+    .trim();
+}
 
 export function getSavedGithubRepo(): string {
   try {
-    return localStorage.getItem(GITHUB_REPO_STORAGE_KEY) || 'foreval69/marvel-chrono-tracker';
+    const saved = localStorage.getItem(GITHUB_REPO_STORAGE_KEY);
+    if (!saved || saved === 'foreval69/marvel-chrono-tracker') {
+      return DEFAULT_GITHUB_REPO;
+    }
+    return cleanRepoString(saved);
   } catch {
-    return 'foreval69/marvel-chrono-tracker';
+    return DEFAULT_GITHUB_REPO;
   }
 }
 
-export function saveGithubRepo(repo: string): void {
+export function saveGithubRepo(repo: string): string {
+  const cleaned = cleanRepoString(repo) || DEFAULT_GITHUB_REPO;
   try {
-    localStorage.setItem(GITHUB_REPO_STORAGE_KEY, repo.trim().replace(/^https?:\/\/github\.com\//, ''));
+    localStorage.setItem(GITHUB_REPO_STORAGE_KEY, cleaned);
   } catch (e) {
     console.error('Failed to save github repo', e);
   }
+  return cleaned;
 }
 
 // Compare semantic or tag versions
@@ -55,9 +73,9 @@ function compareVersions(current: string, latest: string): boolean {
  * Checks GitHub API for the latest release in the repository
  */
 export async function checkForGithubUpdates(repoName: string): Promise<GithubReleaseInfo | null> {
-  const cleanRepo = repoName.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/+$/, '');
+  const cleanRepo = cleanRepoString(repoName);
   if (!cleanRepo || !cleanRepo.includes('/')) {
-    throw new Error('Veuillez entrer un nom de dépôt valide au format "utilisateur/depot" (ex: foreval69/marvel-chrono-tracker)');
+    throw new Error('Veuillez entrer un nom de dépôt valide au format "Kheyox/Marvel" ou "https://github.com/Kheyox/Marvel"');
   }
 
   const url = `https://api.github.com/repos/${cleanRepo}/releases/latest`;
@@ -70,7 +88,10 @@ export async function checkForGithubUpdates(repoName: string): Promise<GithubRel
 
   if (!response.ok) {
     if (response.status === 404) {
-      throw new Error(`Aucune version publiée trouvée sur le dépôt ${cleanRepo}. Exécutez le workflow GitHub Actions au moins une fois.`);
+      throw new Error(`Aucune version publiée (Release) trouvée sur https://github.com/${cleanRepo}. Dès que le workflow GitHub Actions s'exécute sur le repo, le fichier APK apparaîtra ici automatiquement.`);
+    }
+    if (response.status === 403) {
+      throw new Error(`Limite temporaire de requêtes GitHub atteinte pour votre adresse IP. Réessayez dans quelques minutes ou téléchargez directement depuis https://github.com/${cleanRepo}/releases.`);
     }
     throw new Error(`Erreur lors de la vérification GitHub (${response.status}) : ${response.statusText}`);
   }

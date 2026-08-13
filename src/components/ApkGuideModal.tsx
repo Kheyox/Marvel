@@ -12,10 +12,19 @@ import {
   ExternalLink,
   ShieldCheck,
   Settings,
-  HelpCircle
+  HelpCircle,
+  Check,
+  RotateCcw
 } from 'lucide-react';
 import { APP_VERSION, APP_BUILD_DATE } from '../version';
-import { checkForGithubUpdates, getSavedGithubRepo, saveGithubRepo, GithubReleaseInfo } from '../utils/githubUpdater';
+import { 
+  checkForGithubUpdates, 
+  getSavedGithubRepo, 
+  saveGithubRepo, 
+  cleanRepoString, 
+  DEFAULT_GITHUB_REPO, 
+  GithubReleaseInfo 
+} from '../utils/githubUpdater';
 
 interface ApkGuideModalProps {
   isOpen: boolean;
@@ -24,12 +33,16 @@ interface ApkGuideModalProps {
 
 export const ApkGuideModal: React.FC<ApkGuideModalProps> = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState<'update' | 'pwa' | 'setup'>('update');
-  const [githubRepo, setGithubRepo] = useState(getSavedGithubRepo());
+  const [githubRepo, setGithubRepo] = useState<string>(() => {
+    const saved = getSavedGithubRepo();
+    return saved ? `https://github.com/${saved}` : `https://github.com/${DEFAULT_GITHUB_REPO}`;
+  });
   const [isChecking, setIsChecking] = useState(false);
   const [updateInfo, setUpdateInfo] = useState<GithubReleaseInfo | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [hasCheckedOnce, setHasCheckedOnce] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   
   // PWA Prompt
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -61,12 +74,14 @@ export const ApkGuideModal: React.FC<ApkGuideModalProps> = ({ isOpen, onClose })
 
   if (!isOpen) return null;
 
-  const handleCheckUpdates = async () => {
+  const handleCheckUpdates = async (repoToUse?: string) => {
+    const targetRepo = repoToUse || githubRepo;
+    const cleaned = cleanRepoString(targetRepo);
     setIsChecking(true);
     setErrorMsg(null);
     try {
-      saveGithubRepo(githubRepo);
-      const res = await checkForGithubUpdates(githubRepo);
+      saveGithubRepo(cleaned);
+      const res = await checkForGithubUpdates(cleaned);
       setUpdateInfo(res);
       setHasCheckedOnce(true);
     } catch (err: any) {
@@ -75,6 +90,30 @@ export const ApkGuideModal: React.FC<ApkGuideModalProps> = ({ isOpen, onClose })
     } finally {
       setIsChecking(false);
     }
+  };
+
+  const handleSaveRepo = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const cleaned = cleanRepoString(githubRepo);
+    saveGithubRepo(cleaned);
+    setGithubRepo(`https://github.com/${cleaned}`);
+    setSaveSuccess(true);
+
+    // Trigger update check
+    await handleCheckUpdates(cleaned);
+
+    setTimeout(() => {
+      setSaveSuccess(false);
+      setActiveTab('update');
+    }, 1200);
+  };
+
+  const handleResetDefaultRepo = () => {
+    const defaultUrl = `https://github.com/${DEFAULT_GITHUB_REPO}`;
+    setGithubRepo(defaultUrl);
+    saveGithubRepo(DEFAULT_GITHUB_REPO);
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 2000);
   };
 
   const handleDownloadAndInstall = (url: string) => {
@@ -188,18 +227,22 @@ export const ApkGuideModal: React.FC<ApkGuideModalProps> = ({ isOpen, onClose })
             <div className="space-y-4 animate-fadeIn">
               
               {/* Current Version Card */}
-              <div className="bg-[#050505] border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+              <div className="bg-[#050505] border border-white/10 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <p className="text-[10px] uppercase font-bold text-white/40 tracking-wider">Version actuelle installée</p>
                   <p className="text-xl font-black italic text-white flex items-center gap-2">
                     <span>v{APP_VERSION}</span>
                     <span className="text-xs text-white/50 font-normal font-mono">({APP_BUILD_DATE})</span>
                   </p>
+                  <p className="text-[11px] text-white/50 font-mono mt-1 flex items-center gap-1">
+                    <Github className="w-3 h-3 text-[#E62429]" />
+                    <span>Dépôt : <strong className="text-white">{cleanRepoString(githubRepo)}</strong></span>
+                  </p>
                 </div>
                 <button
-                  onClick={handleCheckUpdates}
+                  onClick={() => handleCheckUpdates()}
                   disabled={isChecking}
-                  className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-white/10 flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
+                  className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-white/10 flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${isChecking ? 'animate-spin text-[#E62429]' : ''}`} />
                   <span>{isChecking ? 'Vérification...' : 'Vérifier maintenant'}</span>
@@ -211,7 +254,7 @@ export const ApkGuideModal: React.FC<ApkGuideModalProps> = ({ isOpen, onClose })
                 <div className="bg-[#050505] border border-white/10 rounded-2xl p-8 text-center space-y-3">
                   <RefreshCw className="w-8 h-8 text-[#E62429] animate-spin mx-auto" />
                   <p className="text-sm font-bold text-white">Interrogation du dépôt GitHub...</p>
-                  <p className="text-xs text-white/50 font-mono">{githubRepo}</p>
+                  <p className="text-xs text-white/50 font-mono">https://github.com/{cleanRepoString(githubRepo)}</p>
                 </div>
               ) : updateInfo ? (
                 updateInfo.isNewer ? (
@@ -298,19 +341,28 @@ export const ApkGuideModal: React.FC<ApkGuideModalProps> = ({ isOpen, onClose })
               {errorMsg && (
                 <div className="bg-amber-950/30 border border-amber-500/50 rounded-2xl p-4 text-xs space-y-2">
                   <div className="flex items-center gap-2 text-amber-400 font-bold">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>Dépôt GitHub non connecté ou aucune release publiée</span>
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>Information sur le dépôt GitHub</span>
                   </div>
                   <p className="text-white/80 leading-relaxed">
                     {errorMsg}
                   </p>
-                  <div className="pt-2">
+                  <div className="pt-2 flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => setActiveTab('setup')}
                       className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
                     >
-                      Configurer mon lien de dépôt GitHub →
+                      Modifier / Configurer le dépôt →
                     </button>
+                    <a
+                      href={`https://github.com/${cleanRepoString(githubRepo)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1"
+                    >
+                      <span>Ouvrir sur GitHub</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
                   </div>
                 </div>
               )}
@@ -342,10 +394,10 @@ export const ApkGuideModal: React.FC<ApkGuideModalProps> = ({ isOpen, onClose })
                   <span>Mise à jour automatique 100% sans aller sur GitHub :</span>
                 </h5>
                 <p>
-                  1. À chaque modification enregistrée et exportée sur votre GitHub, le workflow compile une nouvelle APK.
+                  1. À chaque commit exporté sur votre dépôt <code>https://github.com/{cleanRepoString(githubRepo)}</code>, GitHub Actions compile automatiquement un nouvel APK.
                 </p>
                 <p>
-                  2. Votre application vérifie périodiquement GitHub Releases. Dès qu'une version supérieure est détectée, elle propose de l'installer en 1 clic.
+                  2. L'application vérifie la release et vous propose le téléchargement direct en 1 clic.
                 </p>
               </div>
 
@@ -385,30 +437,78 @@ export const ApkGuideModal: React.FC<ApkGuideModalProps> = ({ isOpen, onClose })
           {/* TAB 3: SETUP GITHUB REPO */}
           {activeTab === 'setup' && (
             <div className="space-y-4 animate-fadeIn">
-              <div className="bg-[#050505] border border-white/10 rounded-xl p-4 space-y-3">
-                <h4 className="text-xs font-black uppercase text-[#E62429] tracking-wider">
-                  Lien de votre dépôt GitHub (pour les vérifications de MAJ) :
-                </h4>
+              <form onSubmit={handleSaveRepo} className="bg-[#050505] border border-white/10 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-black uppercase text-[#E62429] tracking-wider">
+                    Lien de votre dépôt GitHub (pour les vérifications de MAJ) :
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={handleResetDefaultRepo}
+                    className="text-[11px] text-white/50 hover:text-white flex items-center gap-1 hover:underline cursor-pointer"
+                    title="Remettre le lien par défaut"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Dépôt officiel</span>
+                  </button>
+                </div>
+
                 <p className="text-xs text-white/70">
-                  Indiquez le nom de votre repository GitHub (ex: <code className="bg-black/60 text-emerald-400 px-1 py-0.5 rounded font-mono">foreval69/marvel-chrono-tracker</code>).
+                  Collez l'URL complète de votre repo GitHub ou son nom :
                 </p>
                 
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     value={githubRepo}
-                    onChange={(e) => setGithubRepo(e.target.value)}
-                    placeholder="pseudo/nom-du-repo"
+                    onChange={(e) => {
+                      setGithubRepo(e.target.value);
+                      setSaveSuccess(false);
+                    }}
+                    placeholder="https://github.com/Kheyox/Marvel"
                     className="flex-1 bg-black border border-white/20 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-[#E62429]"
                   />
                   <button
-                    onClick={handleCheckUpdates}
-                    className="bg-[#E62429] hover:bg-red-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors cursor-pointer"
+                    type="submit"
+                    className={`text-xs font-black uppercase italic px-5 py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+                      saveSuccess 
+                        ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-950/60' 
+                        : 'bg-[#E62429] hover:bg-red-500 text-white shadow-lg shadow-red-950/60'
+                    }`}
                   >
-                    Enregistrer
+                    {saveSuccess ? (
+                      <>
+                        <Check className="w-4 h-4 stroke-[3]" />
+                        <span>Enregistré ✓</span>
+                      </>
+                    ) : (
+                      <span>Enregistrer</span>
+                    )}
                   </button>
                 </div>
-              </div>
+
+                {/* Instant Success Banner */}
+                {saveSuccess && (
+                  <div className="p-2.5 bg-emerald-950/60 border border-emerald-500/50 rounded-xl text-xs text-emerald-300 flex items-center gap-2 animate-fadeIn">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Dépôt enregistré avec succès ! Redirection vers les mises à jour...</span>
+                  </div>
+                )}
+
+                {/* Quick preset button for Kheyox/Marvel */}
+                <div className="pt-1 flex items-center gap-2">
+                  <span className="text-[11px] text-white/40">Dépôt actuel configuré :</span>
+                  <a
+                    href={`https://github.com/${cleanRepoString(githubRepo)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] font-mono text-[#E62429] hover:underline flex items-center gap-1"
+                  >
+                    <span>https://github.com/{cleanRepoString(githubRepo)}</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              </form>
 
               {/* GitHub Actions workflow recap */}
               <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4 space-y-3 text-xs leading-relaxed">
@@ -417,7 +517,7 @@ export const ApkGuideModal: React.FC<ApkGuideModalProps> = ({ isOpen, onClose })
                   <span>Workflow automatique déjà en place (.github/workflows/build-apk.yml) :</span>
                 </h5>
                 <ol className="list-decimal list-inside space-y-2 text-white/80">
-                  <li>Chaque commit / synchronisation sur la branche <code>main</code> déclenche GitHub Actions.</li>
+                  <li>Chaque commit / synchronisation sur la branche <code>main</code> de <strong>Kheyox/Marvel</strong> déclenche GitHub Actions.</li>
                   <li>GitHub compile l'APK Android avec Capacitor & Gradle.</li>
                   <li>GitHub crée automatiquement une <strong>Release</strong> contenant le fichier <code>MarvelChronoTracker.apk</code>.</li>
                   <li>Cette fenêtre dans l'application détecte la nouvelle Release et permet de l'installer directement !</li>
