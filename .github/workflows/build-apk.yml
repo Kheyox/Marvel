@@ -1,17 +1,22 @@
-name: Build Android APK
+name: Build & Release Android APK
 
 on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  build-apk:
+  build-and-release:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -31,22 +36,66 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Install Capacitor CLI & Android
+      - name: Set up Capacitor & Android Project
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
           npx cap init "Marvel Chrono Tracker" "com.marvelchrono.tracker" --web-dir dist
           npx cap add android || true
           npx cap sync android
 
-      - name: Build Android APK
+      - name: Build Android APK (Debug / Standalone)
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Upload APK Artifact
+      - name: Prepare APK Release Files
+        id: prepare_release
+        run: |
+          mkdir -p release_assets
+          # Extract version from package or timestamp
+          VERSION="v1.1.${{ github.run_number }}"
+          echo "RELEASE_TAG=$VERSION" >> $GITHUB_OUTPUT
+          
+          # Rename apk for clean download
+          cp android/app/build/outputs/apk/debug/app-debug.apk release_assets/MarvelChronoTracker.apk
+          
+          # Create version manifest JSON for in-app auto updater
+          cat <<EOF > release_assets/version.json
+          {
+            "version": "$VERSION",
+            "buildNumber": ${{ github.run_number }},
+            "releaseDate": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
+            "apkUrl": "https://github.com/${{ github.repository }}/releases/download/$VERSION/MarvelChronoTracker.apk",
+            "releaseNotes": "Mise à jour automatique Marvel Chrono Tracker (Build ${{ github.run_number }})."
+          }
+          EOF
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Marvel-Chrono-Tracker-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: MarvelChronoTracker-${{ steps.prepare_release.outputs.RELEASE_TAG }}
+          path: release_assets/MarvelChronoTracker.apk
           retention-days: 30
+
+      - name: Publish GitHub Release with APK & Manifest
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/heads/')
+        with:
+          tag_name: ${{ steps.prepare_release.outputs.RELEASE_TAG }}
+          name: "Marvel Chrono Tracker ${{ steps.prepare_release.outputs.RELEASE_TAG }}"
+          body: |
+            🚀 **Nouvelle version automatique de Marvel Chrono Tracker !**
+            
+            - **Téléchargement direct APK** : [MarvelChronoTracker.apk](https://github.com/${{ github.repository }}/releases/download/${{ steps.prepare_release.outputs.RELEASE_TAG }}/MarvelChronoTracker.apk)
+            - **Date de build** : $(date)
+            - **Commit** : ${{ github.sha }}
+            
+            *Cette mise à jour est automatiquement détectable et téléchargeable depuis l'application mobile.*
+          draft: false
+          prerelease: false
+          files: |
+            release_assets/MarvelChronoTracker.apk
+            release_assets/version.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -10,6 +10,7 @@ import { ItemDetailModal } from './components/ItemDetailModal';
 import { ExportImportModal } from './components/ExportImportModal';
 import { ApkGuideModal } from './components/ApkGuideModal';
 import { calculateProgressStats, formatMinutesToHours } from './utils/formatters';
+import { checkForGithubUpdates, getSavedGithubRepo } from './utils/githubUpdater';
 import { Film } from 'lucide-react';
 
 const LOCAL_STORAGE_KEY = 'marvel_chrono_tracker_progress_v1';
@@ -39,6 +40,23 @@ export default function App() {
   const [selectedItemForModal, setSelectedItemForModal] = useState<MarvelItem | null>(null);
   const [isExportImportOpen, setIsExportImportOpen] = useState(false);
   const [isApkGuideOpen, setIsApkGuideOpen] = useState(false);
+  const [hasUpdateAvailable, setHasUpdateAvailable] = useState(false);
+
+  // Background check for updates
+  useEffect(() => {
+    const checkBgUpdates = async () => {
+      try {
+        const repo = getSavedGithubRepo();
+        const info = await checkForGithubUpdates(repo);
+        if (info && info.isNewer) {
+          setHasUpdateAvailable(true);
+        }
+      } catch {
+        // Silently ignore if offline or repo not configured yet
+      }
+    };
+    checkBgUpdates();
+  }, []);
 
   // --- LOCALSTORAGE SYNC ---
   useEffect(() => {
@@ -161,6 +179,7 @@ export default function App() {
         watchedCount={globalStats.watchedItemsCount}
         watchedPercentage={globalStats.percentageCount}
         totalHoursFormatted={globalStats.totalFormatted.formattedShort}
+        hasUpdateAvailable={hasUpdateAvailable}
       />
 
       {/* Main Container */}

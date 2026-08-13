@@ -1,5 +1,6 @@
 import React from 'react';
-import { Download, RotateCcw, Smartphone } from 'lucide-react';
+import { Download, RotateCcw, Smartphone, RefreshCw } from 'lucide-react';
+import { APP_VERSION } from '../version';
 
 interface HeaderProps {
   onOpenExportImport: () => void;
@@ -9,6 +10,7 @@ interface HeaderProps {
   watchedCount: number;
   watchedPercentage: number;
   totalHoursFormatted: string;
+  hasUpdateAvailable?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -19,56 +21,75 @@ export const Header: React.FC<HeaderProps> = ({
   watchedCount,
   watchedPercentage,
   totalHoursFormatted,
+  hasUpdateAvailable = false,
 }) => {
   return (
     <header className="bg-[#050505] border-b border-white/10 sticky top-0 z-40 backdrop-blur-xl bg-opacity-95 shadow-2xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4">
           
           {/* Left Brand Identity */}
           <div className="flex flex-col">
-            <span className="text-[#E62429] font-black text-xs uppercase tracking-[0.3em] mb-1">
-              Archive Numérique
-            </span>
-            <h1 className="text-3xl sm:text-5xl font-black italic uppercase leading-none tracking-tighter text-white">
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-[#E62429] font-black text-[10px] sm:text-xs uppercase tracking-[0.3em]">
+                Archive Numérique
+              </span>
+              <span className="bg-white/10 text-white/60 text-[9px] font-mono px-1.5 py-0.2 rounded border border-white/10">
+                v{APP_VERSION}
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black italic uppercase leading-none tracking-tighter text-white">
               Marvel Chronology
             </h1>
           </div>
 
           {/* Right Stats & Action Controls */}
-          <div className="flex items-center justify-between md:justify-end gap-4 sm:gap-6 border-t md:border-t-0 border-white/10 pt-3 md:pt-0">
+          <div className="flex items-center justify-between md:justify-end gap-3 sm:gap-6 border-t md:border-t-0 border-white/10 pt-2.5 md:pt-0">
             
             {/* Total Duration Stat */}
             <div className="text-left md:text-right">
-              <p className="text-white/40 text-[10px] uppercase font-bold tracking-widest">
+              <p className="text-white/40 text-[9px] sm:text-[10px] uppercase font-bold tracking-widest">
                 Durée Totale
               </p>
-              <p className="text-xl sm:text-2xl font-mono font-bold text-white">
+              <p className="text-lg sm:text-2xl font-mono font-bold text-white leading-tight">
                 {totalHoursFormatted}
               </p>
             </div>
 
             {/* Progression Stat */}
-            <div className="text-left md:text-right border-l border-white/10 pl-4 sm:pl-6">
-              <p className="text-white/40 text-[10px] uppercase font-bold tracking-widest">
+            <div className="text-left md:text-right border-l border-white/10 pl-3 sm:pl-6">
+              <p className="text-white/40 text-[9px] sm:text-[10px] uppercase font-bold tracking-widest">
                 Progression
               </p>
-              <p className="text-xl sm:text-2xl font-mono font-black text-[#E62429]">
+              <p className="text-lg sm:text-2xl font-mono font-black text-[#E62429] leading-tight">
                 {watchedPercentage}%
               </p>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-2 border-l border-white/10 pl-4 sm:pl-6">
+            <div className="flex items-center gap-2 border-l border-white/10 pl-3 sm:pl-6">
               
-              {/* Mobile / APK Button */}
+              {/* Mobile / APK Button with Update Notification Badge */}
               <button
                 onClick={onOpenApkGuide}
-                className="flex items-center gap-1.5 bg-[#E62429] hover:bg-[#ff3036] text-white text-xs font-black uppercase italic px-3 py-2 rounded-xl shadow-lg shadow-red-950/60 transition-all cursor-pointer"
-                title="Installer sur mobile ou générer un APK"
+                className={`relative flex items-center gap-1.5 text-xs font-black uppercase italic px-3 py-2 rounded-xl shadow-lg transition-all cursor-pointer ${
+                  hasUpdateAvailable 
+                    ? 'bg-emerald-500 hover:bg-emerald-400 text-black ring-2 ring-emerald-400 animate-pulse' 
+                    : 'bg-[#E62429] hover:bg-[#ff3036] text-white shadow-red-950/60'
+                }`}
+                title="Mises à jour APK & Installation mobile"
               >
-                <Smartphone className="w-3.5 h-3.5" />
-                <span>APK / Mobile</span>
+                {hasUpdateAvailable ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>MAJ Disponible !</span>
+                  </>
+                ) : (
+                  <>
+                    <Smartphone className="w-3.5 h-3.5" />
+                    <span>APK / Mobile</span>
+                  </>
+                )}
               </button>
 
               <button
