@@ -31,11 +31,9 @@ jobs:
           VERSION="1.1.${{ github.run_number }}"
           TODAY=$(date +'%Y-%m-%d')
           echo "RELEASE_TAG=v$VERSION" >> $GITHUB_ENV
-          cat <<EOF > src/version.ts
-export const APP_VERSION = '$VERSION';
-export const APP_BUILD_DATE = '$TODAY';
-export const DEFAULT_GITHUB_REPO = '${{ github.repository }}';
-EOF
+          echo "export const APP_VERSION = '$VERSION';" > src/version.ts
+          echo "export const APP_BUILD_DATE = '$TODAY';" >> src/version.ts
+          echo "export const DEFAULT_GITHUB_REPO = '${{ github.repository }}';" >> src/version.ts
 
       - name: Build Web Application
         run: npm run build
@@ -86,15 +84,13 @@ EOF
           cp android/app/build/outputs/apk/debug/app-debug.apk release_assets/MarvelChronoTracker.apk
           
           # Create version manifest JSON for in-app auto updater
-          cat <<EOF > release_assets/version.json
-          {
-            "version": "$VERSION",
-            "buildNumber": ${{ github.run_number }},
-            "releaseDate": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
-            "apkUrl": "https://github.com/${{ github.repository }}/releases/download/$VERSION/MarvelChronoTracker.apk",
-            "releaseNotes": "Mise à jour automatique Marvel Chrono Tracker (Build ${{ github.run_number }})."
-          }
-          EOF
+          printf '{\n  "version": "%s",\n  "buildNumber": %s,\n  "releaseDate": "%s",\n  "apkUrl": "https://github.com/%s/releases/download/%s/MarvelChronoTracker.apk",\n  "releaseNotes": "Mise à jour automatique Marvel Chrono Tracker (Build %s)."\n}\n' \
+            "$VERSION" \
+            "${{ github.run_number }}" \
+            "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+            "${{ github.repository }}" \
+            "$VERSION" \
+            "${{ github.run_number }}" > release_assets/version.json
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
