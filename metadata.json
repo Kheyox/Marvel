@@ -1,0 +1,6 @@
+{
+  "name": "Marvel Chrono Tracker",
+  "description": "Chronologie complète Marvel, suivi de visionnage, durées et plateformes de streaming (MCU, Spider-Man, X-Men, Deadpool, Venom...).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

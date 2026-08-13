@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="100" fill="#050505"/>
+  <rect x="24" y="24" width="464" height="464" rx="80" fill="#111111" stroke="#E62429" stroke-width="8"/>
+  <rect x="64" y="160" width="384" height="192" rx="16" fill="#E62429"/>
+  <text x="256" y="295" font-family="Impact, Arial Black, sans-serif" font-size="110" font-weight="900" font-style="italic" fill="#FFFFFF" text-anchor="middle" letter-spacing="4">MARVEL</text>
+  <text x="256" y="400" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="28" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="8">CHRONO TRACKER</text>
+  <circle cx="256" cy="105" r="28" fill="#E62429"/>
+  <path d="M246 92 L266 105 L246 118 Z" fill="#FFFFFF"/>
+</svg>
