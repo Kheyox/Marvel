@@ -26,6 +26,17 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
+      - name: Inject Version into Application
+        run: |
+          VERSION="1.1.${{ github.run_number }}"
+          TODAY=$(date +'%Y-%m-%d')
+          echo "RELEASE_TAG=v$VERSION" >> $GITHUB_ENV
+          cat <<EOF > src/version.ts
+export const APP_VERSION = '$VERSION';
+export const APP_BUILD_DATE = '$TODAY';
+export const DEFAULT_GITHUB_REPO = '${{ github.repository }}';
+EOF
+
       - name: Build Web Application
         run: npm run build
 

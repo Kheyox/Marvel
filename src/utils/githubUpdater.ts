@@ -58,15 +58,15 @@ function compareVersions(current: string, latest: string): boolean {
   const currentParts = cleanCurrent.split('.').map(p => parseInt(p, 10) || 0);
   const latestParts = cleanLatest.split('.').map(p => parseInt(p, 10) || 0);
 
-  for (let i = 0; i < Math.max(currentParts.length, latestParts.length); i++) {
+  const len = Math.max(currentParts.length, latestParts.length);
+  for (let i = 0; i < len; i++) {
     const cur = currentParts[i] || 0;
     const lat = latestParts[i] || 0;
     if (lat > cur) return true;
     if (lat < cur) return false;
   }
 
-  // If string formats differ but numerically equal, consider newer if latest != current
-  return cleanLatest !== cleanCurrent;
+  return false;
 }
 
 /**
