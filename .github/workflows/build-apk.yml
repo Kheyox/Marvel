@@ -58,33 +58,11 @@ jobs:
             fi
           done
 
-      - name: Build and Sign Android APK (Release & Debug)
+      - name: Build Android APK
         run: |
           cd android
           chmod +x gradlew
-          
-          # Generate custom release keystore for clean signing
-          keytool -genkeypair -v \
-            -keystore app-release-key.jks \
-            -alias marvelchrono \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -storepass marvelchrono123 \
-            -keypass marvelchrono123 \
-            -dname "CN=Marvel Chrono Tracker, OU=Mobile, O=Marvel Tracker, L=Paris, ST=IDF, C=FR"
-          
-          ./gradlew assembleRelease assembleDebug --no-daemon
-          
-          # Check if unsigned or signed release APK exists, sign it with jarsigner if needed
-          if [ -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
-            jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
-              -keystore app-release-key.jks \
-              -storepass marvelchrono123 \
-              -keypass marvelchrono123 \
-              app/build/outputs/apk/release/app-release-unsigned.apk marvelchrono
-            cp app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release.apk
-          fi
+          ./gradlew assembleDebug --no-daemon
 
       - name: Prepare APK Release Files
         id: prepare_release
@@ -93,14 +71,8 @@ jobs:
           VERSION="v1.1.${{ github.run_number }}"
           echo "RELEASE_TAG=$VERSION" >> $GITHUB_OUTPUT
           
-          # Prefer signed release APK, fallback to debug
-          if [ -f "android/app/build/outputs/apk/release/app-release.apk" ]; then
-            cp android/app/build/outputs/apk/release/app-release.apk release_assets/MarvelChronoTracker.apk
-          elif [ -f "android/app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
-            cp android/app/build/outputs/apk/release/app-release-unsigned.apk release_assets/MarvelChronoTracker.apk
-          else
-            cp android/app/build/outputs/apk/debug/app-debug.apk release_assets/MarvelChronoTracker.apk
-          fi
+          # Use standard universally compatible debug-signed APK
+          cp android/app/build/outputs/apk/debug/app-debug.apk release_assets/MarvelChronoTracker.apk
           
           # Create version manifest JSON for in-app auto updater
           cat <<EOF > release_assets/version.json
