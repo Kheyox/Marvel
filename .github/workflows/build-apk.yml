@@ -21,11 +21,10 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: 22
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --no-audit --no-fund
 
       - name: Build Web Application
         run: npm run build
@@ -38,16 +37,17 @@ jobs:
 
       - name: Set up Capacitor & Android Project
         run: |
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init "Marvel Chrono Tracker" "com.marvelchrono.tracker" --web-dir dist
-          npx cap add android || true
+          npm install --no-audit --no-fund @capacitor/core @capacitor/cli @capacitor/android
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
           npx cap sync android
 
       - name: Build Android APK (Debug / Standalone)
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
 
       - name: Prepare APK Release Files
         id: prepare_release
